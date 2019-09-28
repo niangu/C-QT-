@@ -1,0 +1,70 @@
+                           QSortFilterProxyModel
+
+#include "widget.h"
+#include "ui_widget.h"
+#include<QStringListModel>
+#include<QListView>
+#include<QComboBox>
+#include<QSortFilterProxyModel>
+#include<QLineEdit>
+#include<QVBoxLayout>
+#include<QHBoxLayout>
+#include<QPushButton>
+#include<QLabel>
+
+Widget::Widget(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Widget)
+{
+    QStringList data;
+    data<<"网吧"<<"不"<<"让她帮"<<"更库"<<"该广告"<<"更改"<<"合计"<<"方法"<<"大大"<<"大大大打"<<"哈哈哈"<<"大大大"<<"好孩子哦"<<"我是";
+
+    model=new QStringListModel(data,this);
+
+    modelProxy=new QSortFilterProxyModel(this);
+    modelProxy->setSourceModel(model);
+    modelProxy->setFilterKeyColumn(0);
+    view=new QListView(this);
+    view->setModel(modelProxy);
+
+   QLineEdit *filterInput=new QLineEdit;
+    QLabel *filterLabel=new QLabel(tr("Filter"));
+            QHBoxLayout *filterLayout=new QHBoxLayout;
+            filterLayout->addWidget(filterLabel);
+            filterLayout->addWidget(filterInput);
+
+            syntaxBox=new QComboBox;
+            syntaxBox->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+            syntaxBox->addItem(tr("Regular expression"),QRegExp::RegExp);
+            syntaxBox->addItem(tr("Wildcard"),QRegExp::Wildcard);
+            syntaxBox->addItem(tr("Fixed string"),QRegExp::FixedString);
+            QLabel *syntaxLabel=new QLabel(tr("Syntax"));
+            QHBoxLayout *syntaxLayout=new QHBoxLayout;
+            syntaxLayout->addWidget(syntaxLabel);
+            syntaxLayout->addWidget(syntaxBox);
+
+            QVBoxLayout *layout=new QVBoxLayout(this);
+            layout->addWidget(view);
+            layout->addLayout(filterLayout);
+            layout->addLayout(syntaxLayout);
+            connect(filterInput,SIGNAL(textChanged(QString)),this,SLOT(filterChanged(QString)));
+
+               ui->setupUi(this);
+}
+
+Widget::~Widget()
+{
+    delete ui;
+}
+
+void Widget::filterChanged(const QString &text)
+{
+    QRegExp::PatternSyntax syntax=QRegExp::PatternSyntax(
+                syntaxBox->itemData(syntaxBox->currentIndex()).toInt());
+    QRegExp regExp(text,Qt::CaseInsensitive,syntax);
+    modelProxy->setFilterRegExp(regExp);
+}
+
+
+
+

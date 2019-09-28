@@ -1,0 +1,29 @@
+ubuntu 16.04 + Qt 5.7.1 无法输入中文的解决方法
+2017年02月10日 18:30:11 jason_ql 阅读数：2563 标签： ubuntu qt 更多
+个人分类： Ubuntu Qt
+版权声明：本文为博主原创文章，未经博主允许不得转载。 https://blog.csdn.net/lql0716/article/details/54973160
+ubuntu 16.04 + Qt 5.7.1 无法输入中文的解决方法
+
+author@jason_ql
+http://blog.csdn.net/lql0716
+
+    安装fcitx-frontend-qt5
+
+        sudo apt-get install fcitx-frontend-qt5
+
+    找到以下路径的文件
+
+        /usr/lib/x86_64-linux-gnu/qt5/plugins/platforminputcontexts/libfcitxplatforminputcontextplugin.so
+        这里写图片描述
+
+    将文件libfcitxplatforminputcontextplugin.so复制到以下两个路径下（Qt的安装路径下查找）
+
+        路径1：
+        /home/jason/Qt5.7.1/Tools/QtCreator/lib/Qt/plugins/platforminputcontexts
+
+        路径2：
+        /home/jason/Qt5.7.1/5.7/gcc_64/plugins/platforminputcontexts
+
+    重启Qt即可使用中文输入
+
+

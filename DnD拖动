@@ -1,0 +1,109 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+
+#include <QMainWindow>
+class QTextEdit;
+//namespace Ui {
+//class MainWindow;
+//}
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
+
+private:
+    bool readFile(const QString &fileName);
+    QTextEdit *textEdit;
+   // Ui::MainWindow *ui;
+};
+
+#endif // MAINWINDOW_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include<QTextEdit>
+#include<QDragEnterEvent>
+#include<QMimeData>
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent)
+
+  //  ui(new Ui::MainWindow)
+{
+    textEdit=new QTextEdit;
+    setCentralWidget(textEdit);
+
+    textEdit->setAcceptDrops(false);
+    setAcceptDrops(true);
+
+    setWindowTitle(tr("Text Editor"));
+    //ui->setupUi(this);
+}
+
+
+
+MainWindow::~MainWindow()
+{
+  //  delete ui;
+}
+
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if(event->mimeData()->hasFormat("text/uri-list")){
+        event->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    QList<QUrl>urls=event->mimeData()->urls();
+    if(urls.isEmpty()){
+        return;
+    }
+
+    QString fileName=urls.first().toLocalFile();
+    if(fileName.isEmpty()){
+        return;
+    }
+
+    if(readFile(fileName)){
+        setWindowTitle(tr("%1 - %2").arg(fileName,tr("Drag File")));
+
+    }
+}
+
+bool MainWindow::readFile(const QString &fileName)
+{
+    bool r=false;
+    QFile file(fileName);
+    QString content;
+    if(file.open(QIODevice::ReadOnly)){
+        content=file.readAll();
+        r=true;
+    }
+    textEdit->setText(content);
+    return r;
+
+}
