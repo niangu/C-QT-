@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/image">
+        <file alias="a">C:/Users/计算机/Desktop/位图/工具栏系列图标/glzy8.com#17.png</file>
+        <file alias="b">C:/Users/计算机/Desktop/位图/工具栏系列图标/glzy8.com#45.png</file>
+    </qresource>
+</RCC>
