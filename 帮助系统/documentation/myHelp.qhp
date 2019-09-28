@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<QtHelpProject version="1.0">
+  <namespace>NG.myHelp</namespace>
+  <virtualFolder>doc</virtualFolder>
+  <filterSection>
+   <toc>
+     <section title="我的帮助" ref="index.html">
+       <section title="关于我们" ref="aboutUs.html">
+         <section title="关于NG" ref="about_NG.html"></section>
+         <section title="Qt 系列教程" ref="about_Qt.html">
+         </section>
+       </section>
+       <section title="加入我们" ref="joinUs.html"></section>
+      </section>
+     </toc>
+     <keywords>
+       <keyword name="关于" ref="aboutUs.html"/>
+       <keyword name="NG" ref="about_NG.html"/>
+       <keyword name="Qt" ref="about_Qt.html"/>
+     </keywords>
+     <files>
+       <file>about_Qt.html</file>
+       <file>about_aboutUs.html</file>
+       <file>about_NG.html</file>
+       <file>index.html</file>
+       <file>joinUs.html</file>
+       <file>images/*.png</file>
+     </files>
+   </filterSection>
+ </QtHelpProject>
