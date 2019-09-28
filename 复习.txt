@@ -1,0 +1,441 @@
+打开 qt5.10 for Desktop 命令行,输入windeployqt 项目文件路径
+
+设置程序图标：把.ico文件添加到项目文件中,在.Pro中添加RC_ICONS=myico.ico
+
+用纯代码编写程序:
+1.新建------>其他项目------>Empty qmake Project
+在.pro文件中添加:
+greaterThan(QT_MAJOR_VERSION,4):QT += widgets  //如果Qt的主版本大于4,则需要添加widgets模块
+添加main.cpp:
+#include<QApplication>
+#include<QDialog>
+#include<QLabel>
+int main(int argc,char *argv[])//俩个参数用来接收命令行参数
+{
+QApplication a(argc,argv);//用于管理应用程序的资源,因为Qt程序能够接收命令行参数,所以需要argc和argv俩个参数
+QDialog w;
+w.resize(400,300);
+QLabel label(&w);
+label.move(120,120);
+label.setText("Hello World! 你好Qt!");
+w.show();//新建的可视部件对象都是不可见的,需要用show()显示出来
+
+return a.exec();//开启事件循环
+}
+
+2.创建工程文件夹------>用win文本编辑器创建程序文件------->另存为main.cpp,格式为所有文件,编码为UTF-8
+打开Qt 5.11.1 for Desktop(MinGW 5.3.0 32 bit)------>输入cd 工程文件夹路径------->qmake -project------->用记事本打开.pro文件在最后一行添加:greaterThan(QT_MAJOR_VERSION,4):QT += widgets保存------->qmake------->mingw32-make
+-------->windeployqt .exe所在文件路径
+
+在命令行编译ui文件和程序
+新建工程目录------->把.ui和main.cpp文件放入-------->打开Qt5.11.1 for Desktop(MinGW5.3.0 32 bit)------->cd工程文件路径
+使用uic编译工具,从ui文件生成头文件:uic -o ui_abc.h abc.ui
+
+
+
+-------->qmake -project------>更改.pro文件-------->main.cpp:
+
+#include<QApplication>
+#include<QDialog>
+#include"ui_abc.h"
+
+int main(int argc,char *argv[])
+{
+QApplication a(argc,argv);
+QDialog w;
+Ui::abc ui;
+ui.setupUi(&w);
+w.show();
+
+
+return a.exec();
+
+}
+------>qmake------->mingw32-make-------->cd release------->windeployqt .exe文件路径------->abc.exe
+
+
+
+
+
+
+项目文件
+
+#-----------------------------------------------------------
+#
+#Project created by QtCreator 2017 --------
+#
+#------------------------------------------------------------
+
+
+QT       += core gui
+
+greaterThan(QT_MAJOR_VERSION,4):QT += widgets
+
+TARGET = helloworld   //程序的名称
+TEMPLATE = app        //使用app摸板,表明这是个应用程序
+
+SOURCES += main.cpp\               /*都使用了相对路径,因为都在项目目录中所以只写了文件名
+           hellodialog.cpp
+HEADERS += hellodialog.h
+
+FORMS   += hellodialog.ui
+
+RC_ICONS = myico.ico
+
+
+
+QWidget的构造函数有俩个参数：QWidget *parent=0和Qt::WindowFlags f=0
+Qt::WindowsFlags类型是Qt::WindowType枚举类型值的或组合:为部件指定各种窗口系统属性
+Qt::FramelessWindowHint用来产生一个没有边框的窗口,而Qt::WindowStaysOnTopHint用来使该窗口停留在所有其他窗口上面
+在Qt示例程序中Window Flags程序演示了所有窗口类型
+QWidget中还有一个setWindowState()函数用来设置窗口的状态，其参数由Qt::WindowStates指定,是Qt::WindowState枚举类型值的或组合。窗口状态Qt::WindowState包括最大化Qt::WindowMaximized、最小化Qt::WindowMinimized、全屏显示Qt::WindowFullScreen和活动窗口Qt::WindowActive等，默认值为正常状态Qt::WindowNoState
+
+窗口的大小和位置：widget默认的大小就是它所包含的子部件label的大小，
+对于窗口的大小和位置，根据是否包含边框和标题栏俩种情况，要用不同的函数来获取，可以在帮助中查看Window and Dialog Widget关键字：
+包含框架：x()、y()、frameGeometry、pos()、move()等函数
+不包含框架:geometry()、width()、height()、rect()、size()等函数
+QRect(位置坐标,大小信息)，也就是(x,y,宽,高)
+使用qDebug()函数进行调试，直接使用qDebug()不用使用头文件
+resize()是改变的不包含边框的窗口的大小
+
+对于一个函数中定义的变量，等这个函数执行结束后，它就会自动释放，建立在堆上和栈上的区别，指定了父对象就不用再折构了，对象树
+
+
+要想一个对话框成为模态对话框，则只需要调用它的exec()函数【open()】；而要使其成为非模态对话框，则可以使用new操作来创建，然后使用show()函数来显示。其实使用show()函数也可以建立模态对话框，只须在其前面使用setModal()函数即可：dialog->setModal(true);     dialog->show();但与.exec()函数有区别，程序还会继续执行，而exec()函数只有当对话框关闭时才会返回，与setModal()相似的还有一个setWindowModality(),它有一个参数来设置模态对话框要阻塞的窗口类型，默认是阻塞整个应用程序的所有窗口
+
+
+
+信号与槽：
+须继承自QObject,分为自动关联和手动关联：
+1：connect(ui->showChildButton,&QPushButton::clicked,this,&MyWidget::showChildDialog);
+2：on_showChildButton_clicked():就是由字符on、发射信号的部件对象名和信号名组成
+
+自动关联对于不是在Qt设计器中往界面上添加的部件，就要在调用setupUi()函数前定义该部件，而且还要使用setObjectName()函数指定部件的对象名，这样才可以使用自动关联
+
+函数的重命名：右键单击------->Refactor------->Rename Symbol Under Cursor,或者直接使用Ctrl+Shift+R快捷键，在出现的替换栏中输入on_showChildButton_clicked，再单击Replace就可以了
+
+
+accept()函数是QDialog类中的一个槽，对于一个使用exec()函数实现的模态对话框，执行了这个槽就会隐藏这个模态对话框，并返回QDialog::Accepted,与其对应的还有一个reject()槽，它可以返回一个QDialog::Rejected值
+标准对话框可以在帮助中查看Standard Dialogs
+文件对话框：
+QStringList fileNames=QFileDialog::getOpenFileName(this,tr("文件对话框","E:",tr("图片文件(*png *jpg)"));//QString fileName=QFileName(...);
+getSaveFileName()函数来实现保存文件对话框和文件另存为对话框
+getExistingDirectory()函数来获取一个已存在的文件夹路径
+也可以自定义对象，然后使用相关的函数进行设置
+消息对话框：
+这里使用的按钮都是QMessageBox类提供的标准按钮，几个静态函数的返回值就是那些标准按钮，由QMessageBox::StandardButton枚举类型指定
+如果想使用自定义的图标和按钮，那么可以创建QMessageBox类对象，然后使用相关函数进行操作
+
+QFrame类族：
+QFrame类是带有边框的部件的基类。它的子类包括最常用的标签部件QLabel，另外还有QLCDNumber、QSplitter、QStackedWidget、QToolBox和QAbstractScrollArea类：如QTextEdit类和各种项目视图类
+QFrame类的主要功能就是用来实现不同的边框效果，这主要是由边框形状(Shape)和边框阴影(Shadow)组合来形成的
+lineWidth和midLineWidth，其中，lineWidth是边框边界线的宽度；而midLineWidth是在边框中额外插入的一条线的宽度，这条线的作用是为了形成3D效果，并且只在Box,Hline和VLine表现为凸起或者凹陷时有用
+QFrame类边框形状的取值
+QFrame::NoFrame      //QFrame不进行绘制
+QFrame::Box          //QFrame在它的内容四周绘制一个边框
+QFrame::Panel        //QFrame绘制一个面板，使得内容表现为凸起或者凹陷
+QFrame::StyledPanel  //绘制一个矩形面板、它的效果依赖于当前的GUI样式可以凸起或凹陷
+QFrame::HLine        //QFrame绘制一条水平线，没有任何框架(可以作为分离器)
+QFrame::VLine        //QFrame绘制一条垂直线，没有任何框架（可以作为分离器）
+QFrame::WinPanel     //绘制一个类似于Windows2000中的矩形面板，可以凸起或者凹陷
+
+QFrame类边框阴影的取值：
+QFrame::Plain       //边框和内容没有3D效果，与四周界面在同一水平面上
+QFrame::Raised      //边框和内容表现为凸起，具有3D效果
+QFrame::Sunken      //边框和内容表现为凹陷，具有3D效果
+
+标签QLabel属性：
+对齐方式alignment，字体font，
+QFont font;
+font.setFamily("华文行楷");
+font.setPointSize(20);
+font.setBold(true);
+font.setItalic(true);
+ui->label->setFont(font);
+
+wordWrap实现文本的自动换行
+QFontMetrics类的elidedText()函数用来进行文本省略
+scaledContents实现缩放标签中的内容
+ ui->label->setPixmap(QPixmap("E:/Qt(C++)/myframe/1.png"));  //路径中不能有中文
+
+#include<QMovie>
+QMovie *movie=new QMovie("E:/Qt(C++)/myframe/down_18_11_29_19_20_03.gif");
+ui->label->setMovie(movie);                    //在标签中添加动画
+movie->start();                                //开始播放
+
+
+
+QLCDNumber:显示液晶数字效果
+smallDecimalPoint:显示小数点
+digitCount:设置显示的数字个数
+mode:Dec(十进制)、Hex(十六进制)、Oct(八进制)、Bin(二进制)
+segmentStyle:设置数码的显示样式
+value:要显示的值（也可以在代码中使用display()函数来设置要显示的数值）
+
+
+QStackedWidget提供了一个部件栈，可以有多个界面（页面）,每个界面可以拥有自己的部件，不过每次只能显示一个界面。这个部件需要使用QComboBox或QListWidget来选择它的各个页面currentRowChanged()和setCurrentIndex()
+
+QToolBox:好友，黑名单，陌生人
+
+QAbstractButton类是按钮部件的抽象基类，提供了按钮的通用功能：复选框QCheckBox、标准按钮QPushButton、单选框按钮QRadioButton和工具按钮QToolButton
+QPushButton:
+checkable:使它可以拥有选中和未选中俩种状态
+flat:可以不显示该按钮的边框
+toggled(bool checked)【信号的槽】:按钮是否处于被按下状态
+#include<QMenu>
+ui->pushBtn1->setText(tr("&nihao"));
+ui->pushBtn2->setText(tr("帮助(&H)"));
+ui->pushBtn2->setIcon(QIcon("....../mybutton/images/help.png"));
+ui->pushBtn3->setText(tr("z&oom"));
+QMenu *menu=new QMenu(this);
+menu->addAction(QIcon("../mybutton/images/zoom-in.png"),tr("放大"));
+ui->pushBtn3->setMenu(menu);
+
+
+QCheckBox、QRadioButton和QGroupBox
+CheckBox:
+tristate：让它拥有不改变状态、选中状态、和未选中状态
+对于选择按钮后的操作，可以关联它们的stateChanged()信号和自定义的槽，也可以使用isChecked()函数查看一个按钮是否被选中
+也可以使用QButtonGroup类来管理多个按钮
+
+QLineEdit有4种显示模式（echoMode）,可以在echoMode属性中更改它们，分别是：Normal正常显示输入的信息，NoEcho不显示任何输入，这样可以保证不泄露输入的字符位数，Password显示为密码样式，PasswordEchoOnEdit在编辑时显示正常字符，其他情况下显示为密码样式
+
+输入掩码（QLineEdit）(inputMask)：限制输入的内容
+可以通过QLineEdit的inputMask属性设置，也可以使用setInputMask()函数在代码中来设置输入掩码。
+“>AA-90-bb-! aa\#H;*”    //“;*”表示用*号来填充空格
+returnPressed()回车键按下信号的槽,如果没有输入完那些必须要输入的字符，按下回车键是不起作用的
+lineEdit->text();     //输出lineEdit2的内容
+
+
+输入验证：在QLineEdit中还可以使用验证器（validator）来对输入进行约束
+//新建验证器，指定范围为100-999
+QValidator *validator=new QIntValidator(100,999,this);//还有QDoubleValidator,可以用它来设置浮点数
+//在行编辑器中使用验证器
+ui->lineEdit3->setValidator(validator);
+如果要设置更强大的字符元素就要使用正则表达式了
+QRegExp rx("-? \\d{1,3}");//在开始输入“-”号或者不输入，然后输入1-3个数字的限制
+QValidator *validator=new QRegExpValidator(rx,this);
+
+
+
+自动补全：QLineEdit提供了自动补全功能，这是利用QCompleter类实现的
+#include<QCompleter>
+QStringList wordList;
+wordList<<"Qt"<<"Qt Creator"<<tr("你好");
+QCompleter *completer=new QCompleter(wordList,this);//新建自动完成器
+completer->setCaseSensitivity(Qt::CaseInsensitive);//设置大小写不敏感
+ui->lineEdit4->setCompleter(completer);
+
+QDateTimeEdit、QSpinBox、QDoubleSpinBox
+displayFormat属性：设置日期显示格式
+calendarPopup:可以使用弹出的日历部件来设置日期
+//设置时间为现在的系统时间
+ui->dateTimeEdit->setDateTime(QDateTime::currentDateTime());
+//设置时间的显示格式
+ui->dateTimeEdit->setDisplayFormat(tr("yyyy年MM月dd日dddHH时mm分ss秒"));y年d日ddd星期H小时（24时制显示）h小时（如果最后有AM或者PM的，则是12h制显示，否则使用24h制，m分s秒z毫秒）
+
+text()获取设置的值，返回QString类型的字符串
+dateTime()函数，返回的是QDateTime类型数据
+
+QSpinBox:
+后缀suffix属性：%
+前缀prefix属性：
+最小值minimum
+最大值maximum
+单步值singleStep
+value为现在显示的数值
+doubleSpinBox又增加了一个小数位数decimals属性
+可以使用value属性来获取设置的数值
+
+
+QAbstractSlider:QScrollBar、QSlider、QDial
+Dial、Horizontal Scroll Bar、Vertical Scroll Bar、Horizontal Slider、Vertical Slider
+Scroll Bar属性：
+maximum、minimum、singleStep每页的步长,默认是10，value与sliderPosition是当前值、tracking设置是否跟踪默认为是，就是在拖动滑块时每移动一个刻度，都会发射valueChanged()信号，如果选择否，则只有拖动滑块释放时才发射该信号、orientation设置部件的方向，有水平和垂直俩种选择,invertedAppearance设置滑块所在位置、invertedControls设置反向控制、另外为了使部件可以获得焦点，需要将focusPolicy设置为StrongFocus
+
+Slider属性：
+tickPosition 设置显示刻度的位置默认不显示刻度、tickInterval 设置刻度的间隔
+Dial属性：
+wrapping,用来设置是否首尾相连，默认开始与结束是分开的、notchTarget用来设置刻度之间的间隔、属性notchesVisible用来设置是否显示刻度
+sliderMoved(int)信号与setValue(int)槽相连接
+
+布局管理系统：
+QWidget::setLayout()函数可以在一个部件上应用布局管理器
+QLayout和QLayoutItem都是在设计自己的布局管理器时才使用的，一般只需使用QLayout的几个子类即可，它们分别是QBoxLayout(基本布局管理器)、QGridLayout(栅格布局管理器)、QFormLayout(窗体布局管理器)和QStackedLayout(栈布局管理器)
+窗体布局管理器（QFormLayout）用来管理表单的输入部件以及与它们相关的标签：从部件栏中找到Form Layout,拖到界面上，然后双击或者在它上面右击并在弹出级联菜单中选择“添加窗体布局行”（也可以在代码中使用addRow()函数来完成）
+同时选中FontComboBox和按钮pushButton,然后按下Ctrl+H
+Vertical Spacer:设置高度为100（把sizeType属性改为fixed才发生变化）
+设置部件大小：
+凡是继承自QWidget的类都有这俩个属性：大小提示（sizeHint）【保存了部件的建议大小】和最小大小提示（minimumSizeHint）【保存了一个建议的最小大小提示】，可以在程序中使用sizeHint()函数来获取sizeHint的值，使用minimumSizeHint()函数获取minimumSizeHint的值，如果使用setMinimumSize()函数设置了部件的最小大小，那么最小大小提示将会被忽略
+大小策略（sizePolicy）属性：QWidget类的属性保存了部件的默认布局行为，在水平和垂直俩个方向分别起作用，控制着部件在布局管理器中的大小变化行为
+伸缩因子（stretch factor）的概念：用来设置部件间比例的【单击horizontalLayout水平布局管理器，然后将layoutStretch属性设置为“2,1”，也可以在使用布局管理器的addWidget()函数添加部件的同时，在第二个参数中指定伸缩因子】
+QWidget类及其子类部件的设置大小的相关属性：
+单击主界面，查看一下其属性栏，其最开始便是几个与大小有关的属性。这里的高度与宽度属性是现在界面的大小；下面的sizePolicy属性可以设置大小策略以及伸缩因子；minimumSize属性属性用来设置最小值；MaximumSize属性设置最大值；sizeIncrement属性和baseSize属性是设置窗口改变大小的，一般不用设置
+
+布局管理器的layoutSizeConstraint属性:用来约束窗口大小，只对顶级布局管理器有用，对其他子部件没有效果如果将界面的顶级布局管理器设置为SetFixedSize这样运行程序可以看到，窗口就无法再变化大小了
+可扩展窗口：
+在pushButton属性栏选中checkable，然后转到它的toggled(bool)信号的槽更改如下：
+void MyWidget::on_pushButton_toggled(bool checked)//显隐窗口按钮
+{
+ui->textEdit->setVisible(checked);     //设置文本编辑器的显示和隐藏
+if(checked)ui->pushButton->setText(tr("隐藏可扩展窗口"));
+else ui->pushButton->setText(tr("显示可扩展窗口"));
+
+}
+还要在MyWidget类的构造函数中添加一行代码：
+ui.textEdit->hide();//让文本编辑器隐藏，也可以使用setVisible(false)函数
+
+分裂器（QSplitter）:
+选中部件，右击---》布局---》使用分裂器水平布局
+设置伙伴(buddy):
+提供助记符来定位键盘焦点到对应的部件上，而这个部件就叫这个QLabel的伙伴
+如果要在代码中设置伙伴关系，则只需要使用QLabel的setBuddy()函数
+设置Tab顺序：
+在构造函数中使用：
+setTabOrder(ui->lineEdit,ui->spinBox);   //lineEdit在spinBox前面
+setTabOrder(ui->spinBox,ui->pushButton); //spinBox在pushButton前面
+setTabOrder(ui->pushButton,ui->checkBox)'//pushButton在checkBox前面
+使用定位器:
+Ctrl+K打开定位器，输入l 8,按下Enter就会跳转到编辑模式的当前打开文档的第8行
+如果输入"? qla"按Enter就会打开QLabel类的帮助文档
+文件(&F)----->新建文件(&N):按Alt+F------>按N
+菜单栏：QMenuBar,向其中添加QMenu类型的菜单对象，然后向弹出的菜单中添加QAction类型的动作对象作为菜单项
+在代码中使用addSeparator()函数来添加间隔器，可以将菜单进行分组
+一个QAction动作包含了图标、菜单显示文本、快捷键、状态栏显示文本、"What's This?"显示文本和工具提示文本，都可以在构建QAction类对象时在构造函数中指定
+另外，还可以设置QAction的checkable属性，如果指定这个动作的checkable为true，有对号或用线框将图标围住，表示该动作被选中
+动作组QActionGroup:它可以包含一组动作QAction,可以设置这组动作中是否只能有一个动作处于选中状态，这对于互斥型动作很有用
+工具栏QToolBar属性：
+toolButtonStyle属性用来设置图标和相应文本的显示及其相对位置，movabel属性用来设置状态栏是否可以移动，allowedArea用来设置允许停靠的位置，iconsize属性用来设置图标的大小，floatable属性用来设置是否可以悬浮
+工具栏中出来可以添加动作外，还可以添加其他的窗口部件，往工具栏中添加部件可以使用addWidget()函数
+当往工具栏中添加一个QAction类对象时就会自动创建一个QToolButton实例
+QTextEdit:支持富文本的处理
+QPlainTextEdit:提供了一个纯文本编辑器
+QTextBrowser：是一个富文本的浏览器，可以看做是QTextEdit的只读模式
+中心区域还可以使用多文档部件，QMdiArea部件就是用来提供一个可以显示MDI多文档界面的区域，从而有效管理多个窗口
+QMdiArea中的子窗口由QMdiSubWindow类提供
+
+Dock部件：QDockWidget类提供了这样一个部件，可以停靠在QMainWindow中，也可以悬浮起来作为桌面顶级窗口【Dock部件，停靠窗口】，一般用于存放一些其他部件来实现特殊功能，就像一个工具箱
+features属性：是否可以关闭，移动和悬浮等，还有allowedArea:用来设置可以停靠的区域
+状态栏：
+可以使用showMessage()函数显示一个临时消息，它会出现在状态栏的最左边，一般用addWidget()函数添加一个QLabel到状态栏上，用于显示正常信息【如页数和行号】，如果要显示永久信息，则要使用addPermanentWidget()函数来添加一个如QLabel一样的可以显示信息的部件，它会生成在状态栏的最右端，不会被临时消息掩盖
+状态栏最右端还有一个QSizeGrip部件，用来调整窗口大小，可以使用setSizeGripEnabled()函数来禁用它
+自定义菜单：
+QWidgetAction类就提供了这样的功能，为了实现自定义菜单，需要新建一个类，它继承自QWidgetAction类，并且在其中重新实现createWidget()函数
+富文本处理：
+文档的光标主要基于QTextCursor类，而文档的框架主要基于QTextDocument类。一个富文本文档的结构分为几种元素来表示，分别是框架（QTextFrame）、文本块（QTextBlock）、表格（QTextTable）、列表（QTextList）。每种元素的格式又使用相应的format类来表示，分别是框架格式（QTextFrameFormat）、文本块格式（QTextBlockFormat）、表格格式（QTextTableFormat）和列表格式（QTextListFormat），这些格式一般在编辑文档时常和QTextCursor类配合使用
+在构建QTextEdit类的对象时就已经构建了一个QTextDocument类对象和一个QTextCursor类对象，只需调用它们进行相应的操作即可
+一个空的文档包含了一个根框架（Root frame）,这个根框架又包含了一个空的文本块（Block）。框架将一个文档分为多个部分，在根框架里可以再添加文本块、子框架和表格等
+文本块QTextBlock类为文本文档QTextDocument提供了一个文本片段（QTextFragment）的容器，一个文本块可以看做一个段落，回车换行就表示创建一个新的文本块。QTextBlock提供了只读接口，是文档分层次的接口的一部分，如果QTextFrame看作一层，那么其中的QTextBlock就是另一层。文本块的格式由QTextBlockFormat类来处理，它主要涉及对齐方式、文本块四周边距、缩进等内容。而文本块中的文本内容的格式，比如字体大小、加粗、下划线等，则由QTextCharFormat类来设置
+像字体格式设置等操作完全可以在QTextEdit类中直接进行。QTextEdit类提供了很多方便的函数，比如常用的复制、粘贴、撤销、恢复、放大、缩小操作等，QTextEdit类的find()函数
+Qt的富文本处理中提供了QSyntaxHighlighter类来实现语法高亮
+为实现这个功能，需要创建QSyntaxHighkighter类的子类，然后重新实现highlightBlock()函数，使用时直接将QTextDocument类对象指针作为其父部件指针，这样就可以自动调用highlightBlock()函数了
+拖放操作分为拖动（Drag）和放下（Drop）俩种操作，当数据拖动时会被存储为MIME类型，Qt中使用QMimeData类来表示MIME类型的数据，并使用QDrag类来完成数据的转移，而整个拖放操作都是在几个鼠标事件和拖放事件中完成的
+
+事件继承自QEvent类，常见的有键盘事件QKeyEvent、鼠标事件QMouseEvent和定时器事件QTimerEvent等
+QEvent::Type，Qt::Key,Qt::Key_Return,键盘上的一些修饰键，比如Ctrl和Shift等，这里需要使用QKeyEvent的modifiers()函数来获取
+怎样来处理一个事件呢：
+1：重新实现部件的paintEvent()、mousePressEvent()等事件处理函数，不过只能用来处理特定部件的特定事件：例如实现拖放操作
+2：重新实现notify()函数。这个函数功能强大，提供了完全的控制，可以在事件过滤器得到事件之前就获得他们。但是，它一次只能处理一个事件
+3：向QApplication对象上安装事件过滤器。因为一个程序只有一个QApplication对象，所以这样实现的功能与使用notify()函数是相同的，优点是可以同时处理多个事件
+4：重新实现event()函数，QObject类的event(）函数可以在事件到达默认的事件处理函数之前获得该事件
+5：在对象上安装事件过滤器。使用事件过滤器可以在一个界面类中同时处理不同子部件的不同事件
+最常用的是方法一，其次是方法五，方法二和方法五很少被用到
+事件的传递顺序是这样的:先是事件过滤器，然后是焦点部件的event()函数。最后是焦点部件的事件处理函数；如果焦点部件忽略了该事件，那么会执行父部件的事件处理函数。注意，event()函数和事件处理函数是在焦点部件内重新定义的，而事件过滤器却是在焦点部件的父部件中定义的
+事件过滤器有InstallEventFilter()和eventFilter(),用来完成一个部件对其他部件的事件的监视
+Qt中也提供了发送一个事件的功能，它由QCoreApplication类的：
+bool QCoreApplication::sendEvent(QObject *receiver,QEvent *event)函数，或者
+void QCoreApplication::postEvent(QObject *receiver,QEvent *event,int priority=Qt::NormalEventPriority)函数来实现
+Qt的部件类中已经定义了一些信号和槽,但更常用的做法是子类化部件，然后添加自定义的信号和槽来实现想要的功能，槽和信号可以多个互相关联，关联顺序即执行顺序
+signals:在signals前面不能用public、private、protected等限定符，建议只在定义该信号的类及其子类中发射该信号。信号只用声明，不能对他进行定义实现，返回值只能是void 类型，只有QObject及其子类派生的类才能使用信号和槽机制，必须在类声明的最开始出添加Q_OBJECT宏
+signals:
+void dlgReturn(int);
+
+void MyDialog::on_pushButton_clicked()//确定按钮
+{
+int value=ui->spinBox->value();//获取输入的数值
+emit dlgReturn(value);         // 发射信号
+close();                       //关闭对话框
+}
+
+slots:一个槽可以是private、public或者protected类型的，槽也可以被声明为虚函数
+private slots:
+void showValue(int value);
+
+MyDialog *dlg=new MyDialog(this);
+connect(dlg,SIGNAL(dlgReturn(int)),this,SLOT(showValue(int)));
+dlg->show();
+
+void Widget::showValue(int value)
+{
+ui->label->setText(tr("获取的值是:%1").arg(value));
+}
+槽中参数的类型要和信号参数的类型相对应，且不能比信号的参数多
+connect(dlg,&MyDialog::dlgReturn,[=](int value)
+{ ui->label->setText(tr("获取的值是:%1").arg(value));})//这种形式才支持Lambda表达式，
+自动关联：
+private slots:
+void on_myButton_clicked();
+
+构造函数里:QPushButton *button=new QPushButton(this);
+button->setObjectName("myButton");
+ui->setupUi(this);
+
+void Widget::on_myButton_clicked()
+{
+close();
+}
+disconnect():断开信号和槽的关联:
+disconnect(myObject,0,0,0);//断开与一个对象所有信号的所有关联，等价于myObject->disconnect();
+disconnect(myObject,SIGNAL(mySignal()),0,0);//断开与一个指定信号的所有关联，等价于myObject->disconnect(SIGNAL(mySignal()));
+disconnect(myObject,0,myReceiver,0);//断开与一个指定的receiver的所有关联，myObject->disconnect(myReceiver);
+disconnect(myObject,SIGNAL(mySignal()),myReceiver,SLOT(mySlot()));//断开一个指定信号和槽的关联
+等价于：myObject->disconnect(SIGNAL(mySignal()),myReceiver,SLOT(mySlot()));
+等价于：disconnect(myConnection);//myConnection是进行关联时connect()的返回值
+disconnect(dlg,&MyDialog::dlgReturn,this,&Widget::showValue);//这个函数并不能断开信号与一般函数或者lambda表达式之间的关联，如果需要则可以使用connect()返回值进行断开。
+QObject::sender()函数来返回发送该信号的对象的指针
+如果有多个信号关联到了同一个槽上，槽中对每个信号做不同处理则使用QSignalMapper类。QSignalMapper被叫做信号映射器，可以实现对多个相同部件的相同信号进行映射，为其添加字符串或者数值参数，然后在发射出去
+foreach(QString str,map.keys());//从map中获取每一个键
+<QtAlgorithms>只提供了STL中重要的一些算法
+<QtGloBal>也提供了一些函数来实现一些常用的功能
+QByteArray:一'\0'结尾，存储原始二进制数据或者对内存保护要求很高（如在嵌入式Linux上）时使用，一般推荐使用QString,
+QByteArray类拥有和QString类相似的接口函数，比如前面讲到的QString的函数除了arg()以外，在QByteArray中都有相同的用法
+QVariant类是常见的Qt数据类型的一个共用体，可以使用toT(如toInt,toDouble)将其转换为T类型，并获取它的值
+Regexps由表达式(expressions)、量词(quantifiers)和断言（assertions）组成
+建议编写Qt5程序时使用QRegularExpression来代替QRegExp
+
+单击主界面---->工具--->FormEditor----->Preview in---->列出了几种可用的风格【Fusion】
+也可以调用QApplication的setStyle()函数来指定想用的风格
+也可以调用部件的setStyle()函数来指定该部件的风格
+也可以自定义风格，一般的做法是子类化Qt的风格类，或者子类化QCommonStyle类----》Styles Example
+样式表可以使用QApplication::setStyleSheet()函数将其设置到整个应用程序上，也可以使用QWidget::setStyleSheet()函数将其设置到一个指定的部件，样式表比调色板实用许多，调色板受平台限制
+样式表规则：
+QPushButton,QLineEdit,QComboBox{color:red;background-color:white}
+由选择器（selector）和声明（declaration）组成
+样式表冲突解决：特殊的选择器优先
+当使用Qt样式表时，部件并不会自动从父部件继承字体和颜色设置：
+qApp->setStyleSheet("QGroupBox{color:red;}");
+想要QGroupBox的颜色设置到其子部件上，可以这样设置：
+qApp->setStyleSheet("QGroupBox,QGroupBox *{color:red;}");
+设置QObject属性：
+从Qt4.3开始，任何可设计的Q_PROPERTY都可以使用“qproperty-属性名称”语法来设置样式表。例如：
+MyLabel{qproperty-pixmap:url(pixmap.png);}
+MyGroupBox{qproperty-titleColor:rgb(100,200,100);}
+QPushButton{qproperty-iconSize:20px 20px;}
+
+建议使用QRectF来代替QRect()，这样QRectF::right()和QRectF::bottom()会返回真实的右下角坐标
+使用QRect类使用x()+width()和y()+height()来确定右下角坐标
+如果使用了抗锯齿就会对称渲染
+如果要绘制一个复杂的图形，尤其是要重复绘制这样的图形，可以使用QPainterPath类，并使用QPainter::drawPath()进行绘制
+QImage还提供了强大的操作像素的功能
+图形视图框架（Graphics View Framework）、动画框架（The Animation Framework）和状态机框架（The State Machine Framework）来实现更加高级的图形和动画应用
+图形视图框架主要由场景、视图、图形项三部分组成，这三部分分别由QGraphicsScene、QGraphicsView和QGraphicsItem这三个类来表示
+使用视图对象来设置场景背景的好处是可以在多个视图中使用不同的背景和前景来实现特定的效果
+当使用一个没有变换的视图来观察场景时，场景中的一个单元代表屏幕上的一个像素。
+图形视图框架中的坐标系统：图形项坐标、场景坐标、视图坐标，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标
+setPos()函数：指定图形项的位置
+子图形项的坐标不会受到父图形项变换的影响，相对于场景，子图形项会跟随父图形项的变换
+所有的图形项都包含一个人Z值来设置它们的层叠顺序，一个图形项的Z值默认为0，可以使用QGraphicsItem::setZValue()来改变一个图形项的Z值，Z值大的在上面，小的在下
+在视图的事件处理函数的最后一定要调用QGraphicsView类的keyPressEvent()函数，不然在场景或者图形项中就无法再接收到该事件了
+使用Qt多媒体类需要在.pro中添加QT+=multimedia
+
+
