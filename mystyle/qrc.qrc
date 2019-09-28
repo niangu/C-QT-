@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/image">
+        <file>png/1.ico</file>
+        <file>png/2.ico</file>
+        <file>png/3.ico</file>
+        <file>png/4.ico</file>
+        <file>png/a.png</file>
+        <file>png/as.png</file>
+        <file>png/b.png</file>
+    </qresource>
+    <qresource prefix="/qss">
+        <file>my.qss</file>
+        <file>my1.qss</file>
+    </qresource>
+</RCC>
