@@ -1,0 +1,52 @@
+自动安装脚本：
+sudo wget -qO- https://get.docker.com/ | sh
+sudo docker rm `sudo docker ps -aq`
+sudo docker rmi hello-world
+
+或者：
+sudo apt-get update
+sudo apt-get install docker.io
+sudo In -sf /usr/bin/docker.io /usr/local/bin/docker
+
+
+sudo docker search ubuntu
+下载镜像：
+sudo docker pull ubuntu:latest
+
+列出镜像目录：
+sudo docker images    /   sudo docker images ubuntu
+
+
+创建容器：
+sudo docker run -i -t name hello ubuntu /bin/bash  #-i -t 可以在镜像的/bin/bash输入命令
+
+
+查看容器列表
+sudo docker ps -a
+
+启动容器：
+sudo docker start hello
+sudo docker restart hello
+
+连接容器：
+sudo docker attach hello  #输入exit或者Ctrl+D终止容器，依次输入Ctrl+P、Ctrl+Q，则不会终止容器而只退出
+
+使用exec从外部运行容器内的命令：
+sudo docker exec hello echo "Hello World"
+
+终止容器：
+sudo docker stop hello
+删除容器：
+sudo docker rm hello
+删除镜像：
+sudo docker rmi ubuntu:latest
+
+
+连接mysql:
+sudo docker pull mysql
+sudo docker images
+sudo docker run -e MYSQL_ROOT_PASSWORD=112233 --name mysql -it mysql
+docker exec -it mysql bash
+mysql -uroot -p
+
+

@@ -1,0 +1,346 @@
+mysql -h localhost -u root -p
+SHOW DATABASES;
+CREATE DATABASE test_db;
+//查看数据库定义
+show create database test_db\G
+drop database test_db;
+use test_db;
+//查看系统支持的引擎类型
+show engines \G
+
+数据库存储引擎：
+MyISAM,Memory,InnoDB,Archive   #多个表可以使用不同的引擎以满足性能和实际需求
+主键唯一，结合外键定义不同数据表之间的关系,外键对应另一个表中的主键
+ create table tb_empl
+    -> (
+    -> id int(11) primary key auto_increment,   #或者在最后添加primary key(id),或者多字段联合主键primary key(id, name), auto_increment自动增加，只能主键有
+    -> name varchar(25) not null#非空约束,
+    -> deptId int(11) unique, #唯一性约束
+    -> salary float default 1.0 #默认值约束
+    -> );
+
+show tables;
+
+#添加名称为fk_emp_dept1的外键约束，外键deptId，其依赖于表tb_dept1的主键id。
+constraint fk_emp_dept1 foreign key(deptId) references tb_dept1(id)
+
+查看表的结构：
+desc tb_empl;
+show create table tb_emp1\G; 
+
+alter table tb_dept3 rename tb_deptment3; #修改表名
+alter table tb_dept1 modify name varchar(30); #修改字段的数据类型
+alter table tb_dept1 change location loc varchar(50); #修改字段名
+alter table tb_dept1 add managerId int(10) not null first;   #添加字段,加first添加在表的第一列
+alter table tb_dept1 add managerId int(10) after name;   #在指定列后添加
+alter table tb_dept1 drop column2; #删除字段
+alter table tb_deptl modify column1 varchar(12) first; #修改某列为第一列
+alter table tb_deptl modify column1 varchar(12) after location; #修改字段到表的指定列之后
+alter table tb_deptment3 engine=MyISAM;#更换引擎
+alter table tb_emp9 drop foreign key fk_emp_dept; #删除外键约束
+drop table if exists tb_dept2; #删除表
+
+select * from fruits;
+select f_name from fruits;
+select f_name,f_price from fruits where f_price = 10.2;
+select s_id,f_name,f_price from fruits where s_id in (101,102) order by f_name; #not in 不在此范围内
+select f_name,f_price from fruits where f_price between 2.0 and 10.20;
+select f_id,f_name from fruits where f_name like 'b%'; #%匹配任意长度的字符，甚至包括零字符。/ %g%,‘_’一次只能匹配一个字符。
+select c_id,c_name,c_email from customers where c_email is null;
+where s_id in(101,102) and f_price >= 5 and f_name = 'apple';
+where s_id = 101 or s_id = 102;
+
+select distinct s_id from fruits;  #查询结果不重复
+select f_name,f_price from fruits order by f_name,f_price desc，f_name;#desc降序方式排序,后面的升序。
+select s_id, count(*) as total from fruits group by s_id; #根据s_id对表中的数据进行分组。
+select s_id, group_concat(f_name) as names from fruits group by s_id having count(f_name)>1 with rollup; #group_concat()将每个分组中各个字段的值显示出来。having 过滤分组。 with rollup-->最后会增加一条计算所有记录的总和。
+select * from fruits group by s_id,f_name;
+select * from fruits limit 4; #显示查询结果的前4行
+select * from fruits limit 4，3;#显示第五个记录开始3行
+
+avg()--->返回某列的平均值
+count()---->返回某列的行数
+MAX()------>返回某列的最大值
+min()------>返回某列的最小值
+sum()------>返回某列值的和
+select count(*) as cust_num from customers;
+
+
+连接查询：
+select suppliers.s_id,s_name,f_name,f_price from fruits,suppliers where fruits.s_id = suppliers.s_id;
+在fruits表和suppliers表之间内连接查询：
+select suppliers.s_id,s_name,f_name,f_price from fruits inner join suppliers on fruits.s_id = suppliers.s_id;
+
+自连接查询：
+select f1.f_id,f1.f_name from fruits as f1, fruits as f2 where f1.s_id = f2.s_id and f2.f_id = 'a1';
+
+外连接查询:
+左连接：
+select customers.c_id,orders.o_num from customers left outer join orders on customers.c_id = orders.c_id;
+右连接：
+select customers.c_id,orders.o_num from customers right outer join orders on customers.c_id = orders.c_id;
+
+复合条件连接查询：
+select customers.c_id,orders.o_num from customers inner join orders on customers.c_id = orders.c_id and customers.c_id = 10001;
+
+带ANY，SOME关键字的子查询
+select num1 from tbl1 where num1 > any (select num2 from tbl2);
+select num1 from tbl1 where num1 > all (select num2 from tbl2);
+select * from fruits where exists (select s_name from suppliers where s_id = 107);  #not exists
+select c_id from orders where o_num in (select o_num from orderitems where f_id='c0'); #not in
+select s_id,f_name from fruits where s_id = (select s1.s_id from suppliers as sl where sl.s_city='Tianjin');
+
+合并查询结果(union all / union)
+select s_id, f_name,f_price from fruits where f_price <9.0 union all select s_id,f_name,f_price from fruits where s_id in (101,103);
+
+as别名 f1.f_name as fruit_name
+
+插入数据：
+insert into person values(3,'Mary',24,'Musician);
+insert into person (name,age,info) values('Willam',20,"sports man");
+insert into person (name,age, info) values ('Evans',27,'secretary'),('Dale',22,'cook'),('Edison',28,'singer');
+把查询结果插入表中
+insert into person(id,name,age,info) select id,name,age,info from person_old;
+
+更新数据：
+update person set age=15,name='LiMing' where id = 11;  #更改age，name的值
+删除记录：
+delete from person where id =11;
+
+索引分类：
+普通索引和唯一索引，单列索引和组合索引，全文索引，空间索引
+
+创建索引：
+CREATE TABLE table_name [col_name data_type] [UNIQUE|FULLTEXT|SPATIAL] [INDEX|KEY] [index_name] (col_name [length]) [ASC | DESC] #唯一，全文，空间索引
+
+create table book
+{
+bookid    int not null,
+bookname  varchar(255) not null,
+authors   varchar(255) not null,
+info      varchar(255) null,
+comment   varchar(255) null,
+year_publication year not null,
+index(year_publication)   #唯一索引：unique index UniqIdx(year_publication),单列索引：index SingleIdx(bookname(20)),组合索引：index MultiIdx(bookid,bookname,info),全文索引：fulltext index FullTxtIdx(info),空间索引：spatial key spatIdx(g),
+}
+
+在已经创建的表上添加索引：
+ALTER TABLE table_name ADD [UNIQUE|FULLTEXT|SPATIAL] [INDEX|KEY] [index_name] (col_name[length],...)[ASC|DESC]
+
+CREATE [UNIQUE|FULLTEXT|SPATIAL] INDEX index_name ON table_name (col_name[length],...) [ASC|DESC] 
+查看索引：
+show index from book \G
+
+删除索引：
+ALTER TABLE table_name DROP INDEX index_name;
+
+alter table book drop index UniqidIdx;
+
+DROP INDEX index_name On table_name;
+
+创建存储过程：
+CREATE PROCEDURE sp_name ([IN | OUT | INOUT] param_name type) [characteristics ...] routine_body
+delimiter //
+create procedure CountProc(OUT param1 INT)
+begin
+select count(*) into param1 from fruits;
+end //
+delimiter ;
+
+调用存储过程：
+call CountProc(0);
+
+创建存储函数：
+CREATE FUNCTION func_name ([IN | OUT | INOUT] param_name type) RETURNS type [characteristic ...] routine_body
+
+delimiter //
+create function NameByZip()
+returns char(50)
+return (select s_name from suppliers where s_call='48075');
+//
+delimiter;
+
+调用存储函数：select NameByZip();
+
+查看存储过程和函数：
+show {procedure|function} status [Like '名称']：
+show procedure status like 'C%'\G
+查看定义：
+show create {procedure|function} name;
+存储函数过程存储在information_schema.Routines表中
+修改：
+alter {procedure|function} sp_name [characteristic ...];
+删除：
+drop {procedure|function} sp_name;
+
+
+定义变量：
+declare myparam int default 100;
+declare var1,var2,var3 int;
+赋值：
+set var1 = 10,var2 = 20;
+使用 select ...into为变量赋值：
+select f_name,f_price into fruitname,fruitprice from fruits where f_id = 'a1';
+
+
+声明光标：
+declare cursor_fruit cursor for select f_name,f_price from fruits;
+打开光标：
+open cursor_fruit;
+使用光标：
+fetch cursor_fruit into fruit_name,fruit_price;
+关闭光标：
+close cursor_fruit;
+
+if 条件 then ...
+  else 条件 then ...
+end if
+
+if val is null
+then select 'val is null';
+else select 'val is not null';
+end if;
+
+case 条件
+ when value then ...
+ when value then ...
+ else ...
+end case
+
+case 
+ when 条件 then ...
+ when 条件 then ...
+ else ...
+end case
+
+
+loop重复执行语句,leave退出循环：
+declare id int default 0;
+add_loop:loop
+set id = id+1;
+	if id>=10 then leave add_loop;
+end if;
+end loop add_loop;
+
+
+iterate转到开头，用于LOOP，REPEAT，WHILE
+repeat带条件的循环：
+declare id int default 0;
+repeat
+set id=id+1;
+until id >= 10;
+end repeat;
+
+while使用
+declare i int default 0;
+while i<10 do
+set i = i+1;
+end while;
+
+单表创建视图：
+create view view_t as select quantity,price,quantity * price from t;
+select * from view_t;
+create view view_t2(qty,price,total) as select quantity,price,quantity * price from t;
+select * from view_t2;
+
+多表创建视图：
+create view stu_glass (id,name,glass) as select student.s_id,student.name,stu_info.glass from student,stu_info where student.s_id = stu_info.s_id;
+select * from stu_glass;
+
+查看视图：
+describe view_t;
+show table status like '视图名字' \G
+show create view view_t\G
+select * from information_schema.views;
+
+修改视图 create or replace view  / alter：
+create or replace view view_t as select * from t;
+alter view view_t as select quantity from t;
+更新视图
+update view_t set quantity=5;
+insert into t_view value (3,5);
+delete from view_t2 where price =5;
+drop view if exists stu_glass;
+
+创建触发器：
+CREATE TRIGGER trigger_name [before| after] [insert|update|delete] on tb1_name for each row trigger_stmt;
+create trigger ins_sum before insert on account for each row set @sum = @sum + NEW.amount;
+多行执行语句：
+CREATE TRIGGER trigger_name [before| after] [insert|update|delete] on tb1_name for each row begin 语句执行列表 END;
+show triggers \G;
+select * from information_schema.triggers where trigger_name = 'trig_update'\G
+删除触发器
+drop trigger test.ins;
+
+权限表：
+user,db,host,tables_priv,columns_priv和procs_priv
+
+登陆：
+mysql -h localhost -u root -p test -e "desc person;"
+
+创建一个用户，名称：jeffrey,密码：mypass,主机名：localhost
+create user 'niangu'@'localhost' identified by 'mypass';
+
+GRANT privileges ON db.table TO user@host [IDENTIFIED BY 'password'] with grant option]
+创建一个新用户testUser,密码为testpwd,授予对所有数据表的select和update权限：
+grant select,update on *.* to 'testUser'@'localhost' identified by 'testpwd';
+select Host,User,Select_priv,Update_priv from MySQL.user where user='testUser';
+insert into user (Host,User,Password) values('localhost','customer1',PASSWORD('customer1'));
+show warnings;
+
+删除：
+drop user 'niangu'@'localhost';
+delete from MySQL.user where host = 'localhost' and user='naingu'
+取消权限
+revoke update on *.* from 'testUser'@'localhost';
+select Host,User,Select_priv,Update_priv,Grant_priv from MySQL.user where user='testUser';
+查看权限：
+show grants for 'user'@'localhost';
+
+数据库备份：
+mysqldump -u root -p booksdb > C:/backup/booksdb_20201111.sql #备份数据库booksdb
+mysqldump -u root -p booksdb books > C:/backuo/books_20201111.sql #备份books表
+mysqldump -u root -p --databases booksdb test>C:\backup\books_testDB_20160301.sql #备份多个数据库，--all-databases > filename.sql 备份全部数据库
+导入备份
+mysql -u root -p booksDB < C:/backup/booksdb_20201111.sql #必须先创建booksDB数据库
+use booksDB;
+source C:\backup\booksDB_20201111.sql
+
+表的导出：
+select * from test.person into outfile "C:\person0.txt";
+日志：
+...
+性能优化：
+
+....
+主从复制
+... 
+插入前禁用索引：
+alter table table_name disable keys;
+重新开启索引：
+alter table table_name enable keys;
+插入前禁用唯一性检查
+set unique_checks = 0;
+开启：
+set unique_checks = 1;
+使用正则表达式查询：
+select * from fruits where f_name regexp '^b';
+
+数据库引擎：
+Archive如果只有INSERT和SELECT操作可以选择，支持高并发插入操作，不是事务安全的，适合存储归档数据如日志信息。
+memory 存放临时数据，数据量不大，不需要较高的数据安全性，将数据保存在内存中，MYSQL使用其存放查询的中间结果。
+如果主要用来插入和查询记录，则MyISAM引擎能提供较高的处理效率。
+如果要提供提交，回滚和崩溃恢复能力的事物安全（ACID兼容）能力，并要求实现并发控制，InnoDB。
+
+
+
+
+
+
+
+
+
+
+
+
+
